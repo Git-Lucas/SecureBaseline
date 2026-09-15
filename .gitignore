@@ -363,7 +363,7 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # OpenSpec and Claude
-docs/
+/docs/prd/
 /specs/
 /archive/
 /changes/
@@ -378,3 +378,6 @@ CLAUDE.md
 *.pem
 *.key
 *.pub
+
+# Windows download metadata (Alternate Data Stream copied by WSL)
+*:Zone.Identifier
