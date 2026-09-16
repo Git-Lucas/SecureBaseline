@@ -122,4 +122,4 @@ Registrar aqui, com data e resultado, cada cenário abaixo, executado uma vez co
 | | Force push ao branch principal é recusado | |
 | | PR com commit não assinado é bloqueado no merge | |
 |16/09/2026| PR introduzindo referência a caminho ignorado falha o check `ignored-path-references` e não mescla |Corrigido|
-|16/09/2026| Push protection bloqueia um segredo de teste |AKIAIOSFODNN7EXAMPLE|
+|16/09/2026| Push protection bloqueia um segredo de teste |AKIAXHU7DRHROWFJ0502|
