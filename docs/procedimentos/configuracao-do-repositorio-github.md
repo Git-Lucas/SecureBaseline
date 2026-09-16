@@ -121,5 +121,5 @@ Registrar aqui, com data e resultado, cada cenário abaixo, executado uma vez co
 | | Push direto ao branch principal é recusado | |
 | | Force push ao branch principal é recusado | |
 | | PR com commit não assinado é bloqueado no merge | |
-| | PR introduzindo referência a caminho ignorado falha o check `ignored-path-references` e não mescla | |
+|16/09/2026| PR introduzindo referência a caminho ignorado falha o check `ignored-path-references` e não mescla |Veja em 'docs\prd\00-visao-geral.md'|
 | | Push protection bloqueia um segredo de teste | |
