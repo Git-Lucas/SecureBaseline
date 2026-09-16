@@ -28,7 +28,9 @@ jobs:
           set -euo pipefail
           # Lista fixa (design D7): mantida em sincronia manual com .gitignore
           # sempre que este mudar (regra "documentacao acompanha a mudanca").
-          PATTERN='docs/prd|openspec/|\.claude/|CLAUDE\.md|\.claudeignore'
+          # Classe [/\\] cobre referencias com separador Unix (/) e Windows (\),
+          # ja que o texto versionado pode ser escrito em qualquer ambiente.
+          PATTERN='docs[/\\]prd|openspec[/\\]|\.claude[/\\]|CLAUDE\.md|\.claudeignore'
           if git grep -n -I -E "$PATTERN" -- ':!.gitignore' ':!.github/workflows/traceability.yml'; then
             echo "::error::Versioned files must not reference git-ignored paths (GOV-05)." >&2
             exit 1
