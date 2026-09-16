@@ -4,34 +4,45 @@
 
 ## 1. Assinatura de commit por chave SSH
 
-Todo commit que chega ao branch principal precisa de assinatura verificada (`gpg.format=ssh`). Configurar em **todo ambiente usado para commitar**.
+Todo commit que chega ao branch principal precisa de assinatura verificada (`gpg.format=ssh`). A configuração é feita **por repositório** (`git config` local, sem `--global`), nunca global — este mantenedor trabalha em vários projetos pessoais que não devem herdar essa configuração. Isso implica repetir os três `git config` abaixo **em cada clone** deste repositório.
 
-### WSL
+Este projeto é mantido em dois clones separados do mesmo remoto: um no filesystem do WSL (uso de linha de comando, scripts) e outro no filesystem do Windows (aberto nativamente pelo Visual Studio). Cada clone tem seu próprio `.git/config`, então cada um recebe sua própria configuração local.
+
+### WSL (dentro do clone, ex. `~/projects/SecureBaseline`)
 
 ```bash
 # gera uma chave dedicada a assinatura, se ainda não existir
 ssh-keygen -t ed25519 -C "assinatura-commits-securebaseline" -f ~/.ssh/id_ed25519_signing
 
-git config --global gpg.format ssh
-git config --global user.signingkey ~/.ssh/id_ed25519_signing.pub
-git config --global commit.gpgsign true
+cd ~/projects/SecureBaseline
+git config gpg.format ssh
+git config user.signingkey ~/.ssh/id_ed25519_signing.pub
+git config commit.gpgsign true
 ```
 
 Registrar `~/.ssh/id_ed25519_signing.pub` no GitHub em **Settings → SSH and GPG keys → New SSH key**, com o tipo **Signing Key** (não Authentication Key).
 
-### Git for Windows (usado pelo Visual Studio)
+### Git for Windows (clone separado, aberto pelo Visual Studio)
 
-O Visual Studio no Windows usa a configuração do Git for Windows, não a do WSL — repetir a configuração lá (pode reaproveitar a mesma chave, copiada para o Windows, ou gerar uma segunda chave e registrá-la também como signing key):
+Reaproveitar a mesma chave (copiada para o Windows) evita registrar uma segunda signing key no GitHub:
 
 ```powershell
-git config --global gpg.format ssh
-git config --global user.signingkey "C:\Users\<usuario>\.ssh\id_ed25519_signing.pub"
-git config --global commit.gpgsign true
+# copia a chave gerada no WSL (distro Ubuntu-24.04) para o perfil do Windows
+Copy-Item \\wsl.localhost\Ubuntu-24.04\home\lucas\.ssh\id_ed25519_signing* "$env:USERPROFILE\.ssh\"
 ```
+
+```powershell
+cd C:\Users\lucas\source\repos\SecureBaseline  # ajustar se o clone Windows estiver em outro caminho
+git config gpg.format ssh
+git config user.signingkey "$env:USERPROFILE\.ssh\id_ed25519_signing.pub"
+git config commit.gpgsign true
+```
+
+Alternativa: gerar uma segunda chave direto no Windows (`ssh-keygen`, se o OpenSSH Client estiver instalado) e registrá-la como uma **segunda** signing key no GitHub — evita copiar a chave privada entre sistemas, ao custo de mais uma chave para gerenciar.
 
 ### Verificação
 
-Fazer um commit de teste em qualquer branch e confirmar que o GitHub mostra o selo **Verified** no commit. Repetir a partir de cada ambiente (WSL e Visual Studio) antes de habilitar o ruleset — um commit sem assinatura verificada, depois do ruleset ativo, é bloqueado no merge.
+Fazer um commit de teste em cada clone e confirmar que o GitHub mostra o selo **Verified** no commit. Repetir a partir de cada ambiente (WSL e Visual Studio) antes de habilitar o ruleset — um commit sem assinatura verificada, depois do ruleset ativo, é bloqueado no merge. Como a configuração é local, clonar o repositório de novo em outro lugar exige repetir estes três `git config`.
 
 ## 2. Checklist de configurações do repositório
 
