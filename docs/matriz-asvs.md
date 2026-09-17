@@ -297,7 +297,7 @@ V14 (Data Protection) está marcado como **Parcial**: parte dos requisitos do ca
 | V13.2.3 | 2 | Pendente | | | |
 | V13.2.4 | 2 | Pendente | | | |
 | V13.2.5 | 2 | Pendente | | | |
-| V13.3.1 | 2 | Implementado | Secret scanning com push protection habilitados no repositório GitHub | [Procedimento de configuração do repositório](procedimentos/configuracao-do-repositorio-github.md) | |
+| V13.3.1 | 2 | Implementado | Secret scanning com push protection habilitados no repositório GitHub | [Log de verificação, 16/09/2026](procedimentos/configuracao-do-repositorio-github.md#6-log-de-verificação) — push com um segredo de teste (PAT real, para validar o checksum) foi recusado pelo GitHub (`GH013`) | |
 | V13.3.2 | 2 | Pendente | | | |
 | V13.4.1 | 1 | Pendente | | | |
 | V13.4.2 | 2 | Pendente | | | |
