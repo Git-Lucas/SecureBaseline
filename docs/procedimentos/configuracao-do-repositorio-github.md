@@ -48,14 +48,21 @@ Fazer um commit de teste em cada clone e confirmar que o GitHub mostra o selo **
 
 Estas configurações não fazem parte do ruleset versionado (que cobre só o branch); são aplicadas manualmente pela UI do GitHub em **Settings**.
 
-- [ ] **Secret scanning** habilitado (`Settings → Code security → Secret scanning`).
-- [ ] **Push protection** habilitada junto do secret scanning.
-- [ ] **Permissão padrão do `GITHUB_TOKEN`** definida como **somente leitura** (`Settings → Actions → General → Workflow permissions → Read repository contents permission`).
-- [ ] **GitHub Actions não pode criar nem aprovar pull requests** (mesma tela, desmarcar "Allow GitHub Actions to create and approve pull requests").
+- [x] **Secret scanning** habilitado (`Settings → Code security → Secret scanning`).
+- [x] **Push protection** habilitada junto do secret scanning.
+- [x] **Permissão padrão do `GITHUB_TOKEN`** definida como **somente leitura** (`Settings → Actions → General → Workflow permissions → Read repository contents permission`).
+- [x] **GitHub Actions não pode criar nem aprovar pull requests** (mesma tela, desmarcar "Allow GitHub Actions to create and approve pull requests").
 
 ### Teste manual único de push protection
 
-Fazer uma tentativa de push contendo um segredo de teste em formato reconhecido pelo GitHub (por exemplo, um token de exemplo com o prefixo de um provedor suportado) e confirmar que o push é recusado. Registrar o resultado no log de verificação (seção 5). Este teste é manual e único — não há verificação automatizada de push protection no CI.
+**Um valor aleatório com o prefixo/tamanho certos não é suficiente para este teste.** Vários tipos de segredo suportados só são bloqueados quando o valor passa por uma validação estrutural, não só por regex de prefixo:
+
+- **Tokens do GitHub (`ghp_`, `gho_`, etc.):** carregam um checksum CRC32 (Base62) nos últimos 6 caracteres, validado localmente pelo push protection antes de bloquear — isso existe justamente para não acusar qualquer string que comece com `ghp_` por coincidência. Uma string aleatória com o prefixo certo mas checksum inválido passa despercebida.
+- **AWS Access Key ID:** só é reconhecida como credencial completa em par com a `aws_secret_access_key` correspondente; o ID sozinho não aciona o bloqueio.
+
+Forma confiável de testar: gerar um fine-grained PAT **real**, de escopo mínimo (ou nenhum) e expiração de 1 dia — o mesmo mecanismo já usado na seção 3 —, colá-lo num arquivo de teste, commitar (assinado) e tentar o push. Por ser um token emitido de fato pelo GitHub, o checksum é válido e o push protection deve recusar o push com `GH013`. **Revogar esse token imediatamente após o teste**, independentemente do resultado, e gerar um token separado para uso real (seção 3).
+
+Registrar o resultado no log de verificação (seção 6). Este teste é manual e único — não há verificação automatizada de push protection no CI.
 
 **Nota:** push protection cobre apenas padrões de alta confiança e pode ser contornada pelo autor do push (o GitHub permite marcar o alerta como "não é um segredo real" e prosseguir); isso gera um alerta de secret scanning, mas não impede o push em definitivo.
 
@@ -118,8 +125,8 @@ Registrar aqui, com data e resultado, cada cenário abaixo, executado uma vez co
 
 | Data | Cenário | Resultado |
 |---|---|---|
-| | Push direto ao branch principal é recusado | |
-| | Force push ao branch principal é recusado | |
-| | PR com commit não assinado é bloqueado no merge | |
+|16/09/2026| Push direto ao branch principal é recusado |Confirmado|
+|16/09/2026| Force push ao branch principal é recusado |Confirmado|
+|16/09/2026| PR com commit não assinado é bloqueado no merge |Confirmado|
 |16/09/2026| PR introduzindo referência a caminho ignorado falha o check `ignored-path-references` e não mescla |Corrigido|
 |16/09/2026| Push protection bloqueia um segredo de teste |Corrigido|
