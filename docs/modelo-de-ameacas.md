@@ -68,6 +68,11 @@ flowchart TB
 | AM-18 | Repositório — branch principal | Tampering | Controle implementado é removido ou alterado silenciosamente por mudança futura | Ruleset sem bypass, PR obrigatório, commits assinados, checks obrigatórios | Implementado, ver [`0013-governanca-mantenedor-unico`](adr/0013-governanca-mantenedor-unico.md) |
 | AM-19 | Repositório — push | Information Disclosure | Segredo commitado por engano chega ao histórico do repositório | Secret scanning com push protection | Planejado (GOV-04) |
 | AM-20 | Pipeline CI | Elevation of Privilege | Workflow de CI com permissão para alterar configuração do repositório | Nenhum workflow tem permissão de administração; ruleset aplicado só localmente | Implementado (GOV-11) |
+| AM-21 | Pipeline CI | Tampering | Action de terceiro comprometida (tag movida ou pacote sequestrado) executa código arbitrário no runner | Toda action pinada por SHA completo, exigido pela configuração do repositório; CodeQL para `actions` bloqueia action não pinada | Implementado (`SUP-01`) |
+| AM-22 | NuGet | Supply Chain | Pacote malicioso publicado recentemente sob nome semelhante a um pacote legítimo (typosquatting/dependency confusion) | `nuget.config` com fonte única mapeada (`SUP-10`); cooldown de 7 dias no Dependabot antes de propor versão recém-publicada (`SUP-06`) | Implementado (`SUP-06`, `SUP-10`) |
+| AM-23 | NuGet | Information Disclosure / Tampering | Dependência (direta ou transitiva) com vulnerabilidade conhecida publicada | NuGetAudit falha o build em qualquer vulnerabilidade conhecida; auditoria diária do branch principal | Implementado (`SUP-11`, `SUP-13`) |
+| AM-24 | Pipeline CI — PR | Elevation of Privilege | Código não confiável de um PR roda com token de escrita elevado (`pull_request_target` mal usado) | Nenhum workflow usa `pull_request_target` para checkout/execução de código do PR | Implementado (`SUP-03`) |
+| AM-25 | NuGet | Tampering | Pacote resolvido de uma fonte inesperada (fonte de máquina/usuário não intencional) | `nuget.config` com `<clear/>` e `packageSourceMapping` restrito a nuget.org | Implementado (`SUP-10`) |
 
 ## Riscos aceitos globais
 
@@ -83,6 +88,14 @@ Riscos que o projeto decide conscientemente não eliminar, por não haver mitiga
 - **E2E agendado, não por PR:** uma regressão de fluxo é descoberta com atraso de até um ciclo de agendamento. Ver [`0012-e2e-agendado-sem-dast`](adr/0012-e2e-agendado-sem-dast.md).
 - **Repositório público:** traces e artefatos de CI ficam visíveis publicamente (dados efêmeros de ambiente de teste, sem informação real).
 - **Push protection contornável:** cobre apenas padrões de alta confiança e o autor do push pode optar por ignorar o bloqueio; o bypass gera alerta, mas não impede o push.
+- **Scorecard Code-Review pontua baixo:** mantenedor único, sem um segundo revisor que aprove PRs.
+- **Scorecard Branch-Protection pontua parcialmente:** ler o ruleset completo exigiria um PAT de administração salvo como secret, o que contraria a governança de token de vida curta (`GOV-11`).
+- **Dependency review quase cego para NuGet sob Central Package Management:** o dependency graph reporta versões de pacote NuGet como `>= 0`; a cobertura efetiva de NuGet vem do NuGetAudit no build (`SUP-11`) e na auditoria diária (`SUP-13`).
+- **Workflows agendados são desabilitados após 60 dias sem atividade no repositório:** o GitHub avisa antes de desabilitar, e qualquer commit reabilita.
+- **Sem licença:** todos os direitos reservados por padrão; o check de License do Scorecard pontua zero.
+- **CodeQL em `build-mode: none` para C# ignora lock files** e pode não alcançar código que só existe após uma build real; reavaliar para `manual` se surgirem lacunas de extração.
+- **Dependabot pode propor uma versão incompatível apesar da regra `ignore`** (limitação conhecida do dependabot-core, [#8183](https://github.com/dependabot/dependabot-core/issues/8183)): o build falha (`NU1202` ou erro de compilação) e a PR não mescla; o mantenedor a fecha.
+- **Syft é baixado em tempo de execução pela `anchore/sbom-action`:** a action é pinada por SHA e a versão do Syft é explícita, mas não há verificação independente do binário baixado.
 
 ## Manutenção deste documento
 

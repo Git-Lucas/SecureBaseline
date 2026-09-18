@@ -53,5 +53,8 @@ jobs:
         with:
           global-json-file: global.json
 
+      # SUP-08: o GitHub Actions define CI=true automaticamente no runner, o
+      # que ativa RestoreLockedMode em Directory.Build.props; `dotnet run`
+      # restaura o app file-based nesse mesmo modo trancado, sem passo extra.
       - name: Validate ASVS matrix
         run: dotnet run tools/asvs-matrix/ValidateAsvsMatrix.cs

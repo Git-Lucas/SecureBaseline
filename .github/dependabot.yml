@@ -1,0 +1,35 @@
+# SUP-06: cobertura NuGet e GitHub Actions, com cooldown de 7 dias antes de
+# uma versao recem-publicada ser proposta (mitiga pacote malicioso publicado
+# as pressas). Um grupo por ecossistema mantem o numero de PRs administravel
+# para um mantenedor unico.
+version: 2
+updates:
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      nuget:
+        patterns: ["*"]
+    # Microsoft.AspNetCore.* e Microsoft.Extensions.* seguem a versao major
+    # do .NET (ex.: 11.x mira net11.0), e o Dependabot nao confere
+    # compatibilidade de target framework de forma confiavel. Migrar de
+    # major do .NET fica uma mudanca deliberada (SDK, TargetFramework e
+    # esses pacotes juntos), nao uma atualizacao automatica.
+    ignore:
+      - dependency-name: "Microsoft.AspNetCore.*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "Microsoft.Extensions.*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns: ["*"]

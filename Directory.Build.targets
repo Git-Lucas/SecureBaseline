@@ -1,0 +1,15 @@
+<Project>
+
+  <!-- SUP-12: toda supressao de auditoria precisa de Justification e Issue;
+       sem os dois metadados, o build falha antes mesmo de restaurar. Uma
+       convencao de revisão de PR não seria verificável automaticamente. -->
+  <!-- A Condition no Target evita o "phantom batch" do MSBuild: sem ela, o
+       Error dispara mesmo com zero NuGetAuditSuppress, pois o batching por
+       %() ainda roda uma vez com metadados vazios quando a lista esta vazia. -->
+  <Target Name="ValidateNuGetAuditSuppressions" BeforeTargets="Build" Condition="'@(NuGetAuditSuppress)' != ''">
+    <Error
+      Condition="'%(NuGetAuditSuppress.Justification)' == '' or '%(NuGetAuditSuppress.Issue)' == ''"
+      Text="NuGetAuditSuppress '%(NuGetAuditSuppress.Identity)' precisa de Justification e Issue (SUP-12)." />
+  </Target>
+
+</Project>
