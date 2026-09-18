@@ -1,0 +1,30 @@
+<Project>
+
+  <!-- SUP-14: todo projeto .NET (inclusive os apps file-based sob tools/)
+       trata warning como erro e roda os analisadores do .NET no nivel
+       recomendado. -->
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+  </PropertyGroup>
+
+  <!-- SUP-08: lock file sempre gerado; em CI (GitHub Actions define CI=true)
+       o restore roda em modo trancado, entao qualquer divergencia entre o
+       lock file e as dependencias resolvidas falha o build. Localmente
+       (sem CI=true) o restore continua livre para atualizar o lock file. -->
+  <PropertyGroup>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode Condition="'$(CI)' == 'true'">true</RestoreLockedMode>
+  </PropertyGroup>
+
+  <!-- SUP-11: NuGetAudit cobre dependencias diretas e transitivas; com
+       TreatWarningsAsErrors, qualquer vulnerabilidade conhecida (NU1901 a
+       NU1904) falha o build. Os valores sao explicitos mesmo onde ja
+       coincidem com o padrao do SDK, para que o arquivo versionado seja a
+       propria evidencia (SUP-10, ASVS 15.1.2). -->
+  <PropertyGroup>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
+  </PropertyGroup>
+
+</Project>

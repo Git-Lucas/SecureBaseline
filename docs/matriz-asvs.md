@@ -34,7 +34,7 @@ O texto de cada requisito não é reproduzido aqui; siga o ID até a fonte ofici
 | V12 | Secure Communication | 9 | 0 | 9 | 0 | Em escopo |
 | V13 | Configuration | 13 | 1 | 12 | 0 | Em escopo |
 | V14 | Data Protection | 9 | 0 | 9 | 0 | Parcial |
-| V15 | Secure Coding and Architecture | 13 | 0 | 13 | 0 | Em escopo |
+| V15 | Secure Coding and Architecture | 13 | 3 | 10 | 0 | Em escopo |
 | V16 | Security Logging and Error Handling | 16 | 0 | 16 | 0 | Em escopo |
 | V17 | WebRTC | 0 | 0 | 0 | 1 | Fora de escopo |
 
@@ -323,10 +323,10 @@ V14 (Data Protection) está marcado como **Parcial**: parte dos requisitos do ca
 
 | ID | Nível | Status | Controle | Evidência | Justificativa |
 |---|---|---|---|---|---|
-| V15.1.1 | 1 | Pendente | | | |
-| V15.1.2 | 2 | Pendente | | | |
+| V15.1.1 | 1 | Implementado | Prazos de remediação por severidade e cadência de atualização de bibliotecas, documentados e versionados | [`docs/politica-de-atualizacao-de-dependencias.md`](politica-de-atualizacao-de-dependencias.md) | |
+| V15.1.2 | 2 | Implementado | Inventário de componentes de terceiros via SBOM CycloneDX gerado a cada build, e resolução de pacotes restrita e mapeada a uma única fonte | SBOM publicado como artefato de [`ci.yml`](../.github/workflows/ci.yml) (`SUP-15`); [`nuget.config`](../nuget.config) (`SUP-10`) | |
 | V15.1.3 | 2 | Pendente | | | |
-| V15.2.1 | 1 | Pendente | | | |
+| V15.2.1 | 1 | Implementado | NuGetAudit falha o build em qualquer vulnerabilidade conhecida (direta ou transitiva); supressão exige justificativa e prazo de remediação documentado | [`Directory.Build.props`](../Directory.Build.props), [`Directory.Build.targets`](../Directory.Build.targets) (`SUP-11`, `SUP-12`); [`docs/politica-de-atualizacao-de-dependencias.md`](politica-de-atualizacao-de-dependencias.md) (`SUP-17`) | |
 | V15.2.2 | 2 | Pendente | | | |
 | V15.2.3 | 2 | Pendente | | | |
 | V15.3.1 | 1 | Pendente | | | |

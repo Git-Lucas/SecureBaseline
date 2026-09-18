@@ -1,0 +1,19 @@
+<Project>
+
+  <!-- SUP-09: versoes de pacote sao declaradas apenas aqui. Um projeto que
+       declare sua propria Version falha a restauracao (NU1008); um
+       VersionOverride tambem falha, pois esta desabilitado abaixo. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageVersionOverrideEnabled>false</CentralPackageVersionOverrideEnabled>
+  </PropertyGroup>
+
+  <!-- SUP-14: GlobalPackageReference adiciona o SonarAnalyzer.CSharp a todo
+       projeto da solucao (private assets, sem exigir referencia por
+       projeto). Versao mais recente compativel com net10.0 verificada em
+       nuget.org na data desta mudanca. -->
+  <ItemGroup>
+    <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="10.34.0.3385" />
+  </ItemGroup>
+
+</Project>

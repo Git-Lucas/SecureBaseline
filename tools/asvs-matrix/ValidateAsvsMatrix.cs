@@ -1,6 +1,12 @@
 #:property TreatWarningsAsErrors=true
 #:property Nullable=enable
 #:property ImplicitUsings=enable
+// SUP-14/D3: o app nunca e publicado, entao AOT nao agrega nada aqui; sem
+// desligar, o lock file passaria a registrar os pacotes ILCompiler/ILLink
+// versionados pelo SDK instalado, e um SDK local mais novo que o da CI (via
+// rollForward de global.json) quebraria `asvs-matrix` sem nenhuma mudanca
+// real de dependencia.
+#:property PublishAot=false
 
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -19,13 +25,13 @@ var validStatuses = new HashSet<string> { "Implementado", "Pendente", "N/A" };
 
 if (!File.Exists(AsvsJsonPath))
 {
-    Console.Error.WriteLine($"Official ASVS JSON not found: {AsvsJsonPath}");
+    await Console.Error.WriteLineAsync($"Official ASVS JSON not found: {AsvsJsonPath}");
     return 1;
 }
 
 if (!File.Exists(MatrixPath))
 {
-    Console.Error.WriteLine($"ASVS matrix not found: {MatrixPath}");
+    await Console.Error.WriteLineAsync($"ASVS matrix not found: {MatrixPath}");
     return 1;
 }
 
@@ -33,7 +39,7 @@ var problems = new List<string>();
 
 // --- carrega os requisitos oficiais ---
 using var jsonStream = File.OpenRead(AsvsJsonPath);
-using var document = JsonDocument.Parse(jsonStream);
+using var document = await JsonDocument.ParseAsync(jsonStream);
 var chapters = document.RootElement.GetProperty("Requirements");
 
 var officialLevels = new Dictionary<string, string>();
@@ -64,7 +70,10 @@ foreach (var chapter in chapters.EnumerateArray())
 
 // --- percorre as linhas de tabela da matriz versionada ---
 // Formato fixo (design D8): | ID | Nivel | Status | Controle | Evidencia | Justificativa |
-var rowPattern = new Regex(@"^\|\s*(V\d+(?:\.\d+){0,2})\s*\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|\s*$");
+var rowPattern = new Regex(
+    @"^\|\s*(V\d+(?:\.\d+){0,2})\s*\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|\s*$",
+    RegexOptions.None,
+    TimeSpan.FromSeconds(1));
 
 var seenIds = new HashSet<string>();
 var seenChapterRows = new HashSet<string>();
@@ -145,32 +154,26 @@ foreach (var line in File.ReadLines(MatrixPath))
     }
 }
 
-foreach (var id in inScopeIds)
+foreach (var id in inScopeIds.Where(id => !seenIds.Contains(id)))
 {
-    if (!seenIds.Contains(id))
-    {
-        problems.Add($"{id}: in-scope L1/L2 requirement missing from the matrix.");
-    }
+    problems.Add($"{id}: in-scope L1/L2 requirement missing from the matrix.");
 }
 
-foreach (var chapter in outOfScopeChapters)
+foreach (var chapter in outOfScopeChapters.Where(chapter => !seenChapterRows.Contains(chapter)))
 {
-    if (!seenChapterRows.Contains(chapter))
-    {
-        problems.Add($"{chapter}: out-of-scope chapter row is missing (expected a justified N/A).");
-    }
+    problems.Add($"{chapter}: out-of-scope chapter row is missing (expected a justified N/A).");
 }
 
 if (problems.Count > 0)
 {
-    Console.Error.WriteLine($"ASVS matrix validation failed with {problems.Count} problem(s):");
+    await Console.Error.WriteLineAsync($"ASVS matrix validation failed with {problems.Count} problem(s):");
     foreach (var problem in problems.OrderBy(p => p, StringComparer.Ordinal))
     {
-        Console.Error.WriteLine($"  - {problem}");
+        await Console.Error.WriteLineAsync($"  - {problem}");
     }
 
     return 1;
 }
 
-Console.WriteLine($"ASVS matrix is valid: {seenIds.Count} requirements covered, {inScopeIds.Count} in scope.");
+await Console.Out.WriteLineAsync($"ASVS matrix is valid: {seenIds.Count} requirements covered, {inScopeIds.Count} in scope.");
 return 0;

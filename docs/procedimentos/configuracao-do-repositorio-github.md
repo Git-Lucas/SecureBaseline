@@ -52,6 +52,9 @@ Estas configurações não fazem parte do ruleset versionado (que cobre só o br
 - [x] **Push protection** habilitada junto do secret scanning.
 - [x] **Permissão padrão do `GITHUB_TOKEN`** definida como **somente leitura** (`Settings → Actions → General → Workflow permissions → Read repository contents permission`).
 - [x] **GitHub Actions não pode criar nem aprovar pull requests** (mesma tela, desmarcar "Allow GitHub Actions to create and approve pull requests").
+- [ ] **Actions pinadas por SHA completo** exigido (`Settings → Actions → General → Require actions to be pinned to a full-length commit SHA`) — `SUP-01`.
+- [ ] **Nenhum self-hosted runner registrado** (`Settings → Actions → Runners`) — `SUP-03`.
+- [ ] **Private vulnerability reporting** habilitado (`Settings → Code security → Private vulnerability reporting`) — `SUP-18`.
 
 ### Teste manual único de push protection
 
@@ -102,6 +105,17 @@ Confirmar na UI do GitHub (**Settings → Rules → Rulesets**) que o ruleset es
 
 **Sempre revogar o token** (**Settings → Developer settings → Personal access tokens**) assim que o script terminar, mesmo antes da expiração de 1 dia.
 
+### Reaplicação com os checks de `add-supply-chain-pipeline`
+
+A change `add-supply-chain-pipeline` acrescenta os checks obrigatórios `build`, `analyze (csharp)`, `analyze (actions)` e `dependency-review`, além de uma regra `code_scanning` que bloqueia o merge em alerta de segurança do CodeQL de severidade `medium` ou maior, ou alerta de qualidade `error`.
+
+A regra `code_scanning` só funciona depois que o CodeQL já tem uma análise do branch principal — aplicada antes disso, ela bloqueia todo PR. Por isso a reaplicação segue esta ordem:
+
+1. Mesclar o PR desta change (os checks novos rodam, mas ainda não são obrigatórios).
+2. Confirmar que o `push` em `master` decorrente do merge executa `codeql.yml` até o fim.
+3. Só então reaplicar o script com um novo token de vida curta, agora com o JSON atualizado (`.github/rulesets/default-branch.json`).
+4. Confirmar na UI (**Settings → Rules → Rulesets**) os quatro novos required status checks e a regra `code_scanning`.
+
 ## 5. Regra: todo novo check obrigatório atualiza o JSON
 
 Uma change que adiciona uma verificação de PR (um novo job de workflow) precisa:
@@ -119,7 +133,21 @@ O nome do job é o *context* do check obrigatório; renomeá-lo sem cuidado deix
 3. Mesclar um PR em que os dois passam.
 4. Remover o job antigo do workflow e do JSON, reaplicar o script uma última vez.
 
-## 6. Log de verificação
+## 6. Dependabot: lock files e mudança de versão major do .NET
+
+O Dependabot (`SUP-06`) atualiza `src/SecureBaseline.Api/packages.lock.json` normalmente (projeto único, sem `ProjectReference`), mas **não** atualiza `tools/asvs-matrix/packages.lock.json` — ele não conhece apps file-based. Uma atualização de um pacote global (hoje, só o `SonarAnalyzer.CSharp`, via `GlobalPackageReference`) portanto passa no `build` mas falha `asvs-matrix` com `NU1004` até o lock file do validador ser regenerado manualmente:
+
+```bash
+git checkout <branch-do-dependabot>
+dotnet run tools/asvs-matrix/ValidateAsvsMatrix.cs   # sem CI=true, reescreve o lock file
+git add tools/asvs-matrix/packages.lock.json
+git commit -S -m "chore: Atualizado lock file do validador ASVS"
+git push
+```
+
+**Migração para uma nova versão major do .NET** (ex.: `net10.0` → `net11.0`) é sempre manual, nunca via Dependabot: o `ignore` em `.github/dependabot.yml` bloqueia atualizações major de `Microsoft.AspNetCore.*` e `Microsoft.Extensions.*` porque eles seguem a versão major do .NET, e o Dependabot não confere compatibilidade de target framework de forma confiável. A migração exige alterar junto, na mesma mudança: `global.json` (SDK), `TargetFramework` do(s) projeto(s) e esses pacotes.
+
+## 7. Log de verificação
 
 Registrar aqui, com data e resultado, cada cenário abaixo, executado uma vez contra o repositório real após o ruleset completo (com checks obrigatórios) estar ativo:
 
@@ -130,3 +158,7 @@ Registrar aqui, com data e resultado, cada cenário abaixo, executado uma vez co
 |16/09/2026| PR com commit não assinado é bloqueado no merge |Confirmado|
 |16/09/2026| PR introduzindo referência a caminho ignorado falha o check `ignored-path-references` e não mescla |Corrigido|
 |16/09/2026| Push protection bloqueia um segredo de teste |Corrigido|
+| | PR com um passo de workflow usando uma action por tag recebe um alerta do CodeQL que bloqueia o merge, e a execução é recusada | Pendente |
+| | PR com lock file desatualizado falha o check `build` | Pendente |
+| | Dependabot abre as primeiras PRs de atualização para NuGet e GitHub Actions | Pendente |
+| | O `build` agendado diário roda em `master` | Pendente |

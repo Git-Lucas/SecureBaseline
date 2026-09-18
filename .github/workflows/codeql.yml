@@ -1,0 +1,49 @@
+name: codeql
+
+# Sem filtro `paths`: os dois checks (`analyze (csharp)`, `analyze (actions)`)
+# sao obrigatorios (SUP-04) e nao podem ficar pendentes num PR so de
+# documentacao. `push` em master gera a baseline usada para calcular alertas
+# novos em cada PR.
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [csharp, actions]
+    # Nome fixo por linguagem: o context do check obrigatorio (`analyze
+    # (csharp)`, `analyze (actions)`) fica estavel mesmo que a matrix ganhe
+    # outras chaves no futuro.
+    name: analyze (${{ matrix.language }})
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+          # security-and-quality inclui security-extended (onde vive
+          # actions/unpinned-tag) e adiciona queries de qualidade, para que
+          # o threshold de erro do ruleset (SUP-16) tenha o que avaliar.
+          queries: security-and-quality
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
+        with:
+          category: "/language:${{ matrix.language }}"

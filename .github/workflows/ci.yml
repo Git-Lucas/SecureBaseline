@@ -1,0 +1,56 @@
+name: ci
+
+# Sem filtro `paths`: um PR só de documentação também precisa deste check
+# obrigatório, senão ele fica pendente para sempre e trava o merge (SUP-04).
+# `schedule` roda a auditoria diária de dependências (SUP-13) no branch
+# principal; `workflow_dispatch` permite disparo manual.
+on:
+  pull_request:
+  push:
+    branches: [master]
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+# GOV-11: nenhum workflow tem permissao de administrar o repositorio. Cada
+# job declara apenas o escopo minimo de que precisa.
+permissions: {}
+
+jobs:
+  # SUP-08, SUP-09, SUP-10, SUP-11, SUP-14: build da solucao com restore
+  # trancado (CI=true), CPM, fontes restritas, auditoria de vulnerabilidades
+  # e analisadores. No `schedule`, o mesmo job audita as dependencias do
+  # branch principal contra dados de vulnerabilidade atuais (SUP-13).
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Build
+        run: dotnet build SecureBaseline.slnx -c Release
+
+      - name: Publish
+        run: dotnet publish src/SecureBaseline.Api -c Release --no-build -o artifacts/publish
+
+      # SUP-15, ASVS 15.1.2: SBOM CycloneDX da saida publicada (o que de fato
+      # seria implantado), publicado como artefato do workflow.
+      - name: Generate SBOM
+        uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
+        with:
+          path: artifacts/publish
+          format: cyclonedx-json
+          syft-version: v1.52.0
+          output-file: artifacts/sbom.cyclonedx.json
+          upload-artifact: true
+          upload-release-assets: false
+          dependency-snapshot: false
