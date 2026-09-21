@@ -52,9 +52,9 @@ Estas configurações não fazem parte do ruleset versionado (que cobre só o br
 - [x] **Push protection** habilitada junto do secret scanning.
 - [x] **Permissão padrão do `GITHUB_TOKEN`** definida como **somente leitura** (`Settings → Actions → General → Workflow permissions → Read repository contents permission`).
 - [x] **GitHub Actions não pode criar nem aprovar pull requests** (mesma tela, desmarcar "Allow GitHub Actions to create and approve pull requests").
-- [ ] **Actions pinadas por SHA completo** exigido (`Settings → Actions → General → Require actions to be pinned to a full-length commit SHA`) — `SUP-01`.
-- [ ] **Nenhum self-hosted runner registrado** (`Settings → Actions → Runners`) — `SUP-03`.
-- [ ] **Private vulnerability reporting** habilitado (`Settings → Code security → Private vulnerability reporting`) — `SUP-18`.
+- [x] **Actions pinadas por SHA completo** exigido (`Settings → Actions → General → Require actions to be pinned to a full-length commit SHA`) — `SUP-01`.
+- [x] **Nenhum self-hosted runner registrado** (`Settings → Actions → Runners`) — `SUP-03`.
+- [x] **Private vulnerability reporting** habilitado (`Settings → Code security → Private vulnerability reporting`) — `SUP-18`.
 
 ### Teste manual único de push protection
 
