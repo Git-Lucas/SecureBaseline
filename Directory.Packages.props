@@ -13,7 +13,7 @@
        projeto). Versao mais recente compativel com net10.0 verificada em
        nuget.org na data desta mudanca. -->
   <ItemGroup>
-    <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="10.34.0.3385" />
+    <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="10.33.0.1635" />
   </ItemGroup>
 
 </Project>
