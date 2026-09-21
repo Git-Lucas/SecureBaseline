@@ -65,7 +65,7 @@ Estas configurações não fazem parte do ruleset versionado (que cobre só o br
 
 Forma confiável de testar: gerar um fine-grained PAT **real**, de escopo mínimo (ou nenhum) e expiração de 1 dia — o mesmo mecanismo já usado na seção 3 —, colá-lo num arquivo de teste, commitar (assinado) e tentar o push. Por ser um token emitido de fato pelo GitHub, o checksum é válido e o push protection deve recusar o push com `GH013`. **Revogar esse token imediatamente após o teste**, independentemente do resultado, e gerar um token separado para uso real (seção 3).
 
-Registrar o resultado no log de verificação (seção 6). Este teste é manual e único — não há verificação automatizada de push protection no CI.
+Registrar o resultado no log de verificação (seção 7). Este teste é manual e único — não há verificação automatizada de push protection no CI.
 
 **Nota:** push protection cobre apenas padrões de alta confiança e pode ser contornada pelo autor do push (o GitHub permite marcar o alerta como "não é um segredo real" e prosseguir); isso gera um alerta de secret scanning, mas não impede o push em definitivo.
 
@@ -158,7 +158,8 @@ Registrar aqui, com data e resultado, cada cenário abaixo, executado uma vez co
 |16/09/2026| PR com commit não assinado é bloqueado no merge |Confirmado|
 |16/09/2026| PR introduzindo referência a caminho ignorado falha o check `ignored-path-references` e não mescla |Corrigido|
 |16/09/2026| Push protection bloqueia um segredo de teste |Corrigido|
-| | PR com um passo de workflow usando uma action por tag recebe um alerta do CodeQL que bloqueia o merge, e a execução é recusada | Pendente |
-| | PR com lock file desatualizado falha o check `build` | Pendente |
-| | Dependabot abre as primeiras PRs de atualização para NuGet e GitHub Actions | Pendente |
-| | O `build` agendado diário roda em `master` | Pendente |
+|21/09/2026| PR com um passo de workflow usando uma action de terceiros por tag recebe um alerta do CodeQL (`actions/unpinned-tag`) que bloqueia o merge |Confirmado|
+|21/09/2026| Workflow que usa uma action por tag, inclusive de primeira parte, tem a execução recusada pela configuração do repositório |Confirmado|
+|21/09/2026| PR com lock file desatualizado falha o check `build` |Confirmado|
+|21/09/2026| Dependabot abre as primeiras PRs de atualização para NuGet e GitHub Actions |Nenhuma atualização disponível no momento da checagem|
+|21/09/2026| O `build` agendado diário roda em `master` |Confirmado|
