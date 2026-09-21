@@ -297,7 +297,7 @@ V14 (Data Protection) está marcado como **Parcial**: parte dos requisitos do ca
 | V13.2.3 | 2 | Pendente | | | |
 | V13.2.4 | 2 | Pendente | | | |
 | V13.2.5 | 2 | Pendente | | | |
-| V13.3.1 | 2 | Implementado | Secret scanning com push protection habilitados no repositório GitHub | [Log de verificação, 16/09/2026](procedimentos/configuracao-do-repositorio-github.md#6-log-de-verificação) — push com um segredo de teste (PAT real, para validar o checksum) foi recusado pelo GitHub (`GH013`) | |
+| V13.3.1 | 2 | Implementado | Secret scanning com push protection habilitados no repositório GitHub | [Log de verificação, 16/09/2026](procedimentos/configuracao-do-repositorio-github.md#7-log-de-verificação) — push com um segredo de teste (PAT real, para validar o checksum) foi recusado pelo GitHub (`GH013`) | |
 | V13.3.2 | 2 | Pendente | | | |
 | V13.4.1 | 1 | Pendente | | | |
 | V13.4.2 | 2 | Pendente | | | |
@@ -326,7 +326,7 @@ V14 (Data Protection) está marcado como **Parcial**: parte dos requisitos do ca
 | V15.1.1 | 1 | Implementado | Prazos de remediação por severidade e cadência de atualização de bibliotecas, documentados e versionados | [`docs/politica-de-atualizacao-de-dependencias.md`](politica-de-atualizacao-de-dependencias.md) | |
 | V15.1.2 | 2 | Implementado | Inventário de componentes de terceiros via SBOM CycloneDX gerado a cada build, e resolução de pacotes restrita e mapeada a uma única fonte | SBOM publicado como artefato de [`ci.yml`](../.github/workflows/ci.yml) (`SUP-15`); [`nuget.config`](../nuget.config) (`SUP-10`) | |
 | V15.1.3 | 2 | Pendente | | | |
-| V15.2.1 | 1 | Implementado | NuGetAudit falha o build em qualquer vulnerabilidade conhecida (direta ou transitiva); supressão exige justificativa e prazo de remediação documentado | [`Directory.Build.props`](../Directory.Build.props), [`Directory.Build.targets`](../Directory.Build.targets) (`SUP-11`, `SUP-12`); [`docs/politica-de-atualizacao-de-dependencias.md`](politica-de-atualizacao-de-dependencias.md) (`SUP-17`) | |
+| V15.2.1 | 1 | Implementado | NuGetAudit falha o build em qualquer vulnerabilidade conhecida (direta ou transitiva); supressão exige justificativa e prazo de remediação documentado | [`Directory.Build.props`](../Directory.Build.props), [`Directory.Build.targets`](../Directory.Build.targets) (`SUP-11`, `SUP-12`); [`docs/politica-de-atualizacao-de-dependencias.md`](politica-de-atualizacao-de-dependencias.md) (`SUP-17`); [Log de verificação, 21/09/2026](procedimentos/configuracao-do-repositorio-github.md#7-log-de-verificação) — o `build` agendado diário rodou em `master` (`SUP-13`) e um PR com lock file desatualizado falhou o check `build` (`SUP-08`) | |
 | V15.2.2 | 2 | Pendente | | | |
 | V15.2.3 | 2 | Pendente | | | |
 | V15.3.1 | 1 | Pendente | | | |
